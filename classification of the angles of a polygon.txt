@@ -1,0 +1,117 @@
+#include <iostream>
+#include <fstream>
+#include<cmath>
+
+using namespace std;
+ifstream fin("date.in");
+ofstream fout("date.out");
+
+struct punct
+{
+    float x,y;
+    bool convex;
+} p[100];
+int n;
+
+int orientare(punct A,punct B,punct C)
+{
+    float d=(B.x-A.x)*(C.y-A.y)-(B.y-A.y)*(C.x-A.x);
+    if(d>0) return -1;
+    if(d<0) return 1;
+    if(d==0) return 0;
+}
+
+float arie(punct a,punct b, punct c)
+{
+    return abs(a.x*(b.y-c.y)+b.x*(c.y-a.y)+c.x*(a.y-b.y));
+}
+
+void principal(int i)
+{
+    punct a,b,c;
+    int j;
+    if(i==0)
+    {
+
+        a=p[n-1];
+        b=p[0];
+        c=p[1];
+    }
+    else if(i==n-1)
+    {
+        a=p[n-2];
+        b=p[n-1];
+        c=p[0];
+    }
+    else
+    {
+        a=p[i-1];
+        b=p[i];
+        c=p[i+1];
+    }
+
+    float arie_principala=arie(a,b,c);
+    float arie_secundara=0;
+
+    for(j=0; j<n; j++)
+    {
+        if(p[j].convex==0&&((p[j].x!=a.x||p[j].y!=a.y)&&(p[j].x!=c.x||p[j].y!=c.y)))
+            arie_secundara=arie_secundara+arie(a,b,p[j])+arie(a,c,p[j])+arie(b,c,p[j]);
+    }
+
+    cout<<arie_principala<<" "<<arie_secundara<<endl;
+
+    if(arie_secundara==arie_principala) fout<<"Punctul "<<i<<" NU e principal"<<endl;
+    else  fout<<"Punctul "<<i<<" e principal"<<endl;
+
+}
+void con()
+{
+    if(orientare(p[n-1],p[0],p[1])==1)
+    {
+        fout<<0<<" convex"<<endl;
+        p[0].convex=1;
+    }
+    else fout<<0<<" concav"<<endl;
+
+    for(int i=0; i<n-2; i++)
+        if(orientare(p[i],p[i+1],p[i+2])==1)
+        {
+            fout<<i+1<<" convex"<<endl;
+            p[i+1].convex=1;
+        }
+        else fout<<i+1<<" concav"<<endl;
+
+    if(orientare(p[n-2],p[n-1],p[0])==1)
+    {
+        fout<<n-1<<" convex"<<endl;
+        p[n-1].convex=1;
+    }
+    else fout<<n-1<<" concav"<<endl;
+
+}
+
+
+int main()
+{
+    int i;
+    fin>>n;
+    for(i=0; i<n; i++)
+        fin>>p[i].x>>p[i].y;
+    con();
+
+    for(i=0; i<n; i++)
+        if(p[i].convex==1)
+            principal(i);
+    return 0;
+}
+
+/*
+5
+3 0
+1.5 -5
+0 0
+1 2
+1 0.2
+
+*/
